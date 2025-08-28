@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dispatch
+  namespace: roboshop
+  labels: # these labels are deployment labels
+    app: dispatch
+    project: roboshop
+    tier: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels: # these labels are used to find the pods
+      app: dispatch
+      project: roboshop
+      tier: app
+  template:
+    metadata:
+      labels: # these labels are pod labels
+        app: dispatch
+        project: roboshop
+        tier: app
+    spec:
+      containers:
+      - name: dispatch
+        image: anilnadikuda/dispatch:v1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "150m"
+            memory: "256Mi"
+          limits:
+            cpu: "300m"
+            memory: "512Mi"
+        envFrom:
+        - configMapRef:
+            name: dispatch
+        -secretRef:
+            name: dispatch
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dispatch
+  namespace: roboshop
+data:
+  DAMQP_HOST: rabbitmq
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dispatch
+  namespace: roboshop
+type: Opaque
+data:
+  AMQP_USER: roboshop
+  AMQP_PASS: roboshop123
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: dispatch
+  namespace: roboshop
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: dispatch
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dispatch
+  namespace: roboshop
+spec:
+  selector:
+    app: dispatch
+    project: roboshop
+    tier: app
+  ports:
+  - protocol: TCP
+    port: 8080 #service-port
+    targetPort: 8080 #container-port
