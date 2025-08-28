@@ -9,7 +9,7 @@ metadata:
     tier: db
 spec:
   selector:
-    matchLables:
+    matchLabels:
       app: mongodb
       project: roboshop
       tier: db
@@ -28,7 +28,7 @@ spec:
         volumeMounts:
         - name: mongodb
           mountPath: /data/db
-    volumeClaimTemplates:
+  volumeClaimTemplates:
     - metadata:
         name: mongodb
       spec:
