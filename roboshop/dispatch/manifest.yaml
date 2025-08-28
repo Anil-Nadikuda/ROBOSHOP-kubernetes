@@ -3,20 +3,20 @@ kind: Deployment
 metadata:
   name: dispatch
   namespace: roboshop
-  labels: # these labels are deployment labels
+  labels:
     app: dispatch
     project: roboshop
     tier: app
 spec:
   replicas: 2
   selector:
-    matchLabels: # these labels are used to find the pods
+    matchLabels:
       app: dispatch
       project: roboshop
       tier: app
   template:
     metadata:
-      labels: # these labels are pod labels
+      labels:
         app: dispatch
         project: roboshop
         tier: app
@@ -35,7 +35,7 @@ spec:
         envFrom:
         - configMapRef:
             name: dispatch
-        -secretRef:
+        - secretRef:
             name: dispatch
 ---
 apiVersion: v1
@@ -44,7 +44,7 @@ metadata:
   name: dispatch
   namespace: roboshop
 data:
-  DAMQP_HOST: rabbitmq
+  AMQP_HOST: rabbitmq
 ---
 apiVersion: v1
 kind: Secret
@@ -53,8 +53,8 @@ metadata:
   namespace: roboshop
 type: Opaque
 data:
-  AMQP_USER: roboshop
-  AMQP_PASS: roboshop123
+  AMQP_USER: cm9ib3Nob3A=        # base64 for "roboshop"
+  AMQP_PASS: cm9ib3Nob3AxMjM=    # base64 for "roboshop123"
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -88,5 +88,5 @@ spec:
     tier: app
   ports:
   - protocol: TCP
-    port: 8080 #service-port
-    targetPort: 8080 #container-port
+    port: 8080     # service port
+    targetPort: 8080 # container port
