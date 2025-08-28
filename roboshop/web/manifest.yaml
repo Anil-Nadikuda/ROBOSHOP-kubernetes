@@ -8,7 +8,6 @@ metadata:
     project: roboshop
     tier: web
 spec:
-  serviceName: "web"
   replicas: 3
   selector:
     matchLabels: # these labels are used to find the pods
